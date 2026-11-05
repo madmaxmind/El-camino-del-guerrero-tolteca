@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CocinaApp — Propuestas de cocina</title>
+<style>
+:root{
+  --terra:#C4622D;--terra-l:#E8845A;--terra-p:#FBF0EA;
+  --ox:#3D4F63;--ox-l:#5A7088;--ox-p:#E8EDF2;
+  --hueso:#F7F5F1;--c:#1A1A1A;--gr:#8A8A8A;--gc:#E8E8E8;
+  --w:#FFFFFF;--ok:#3A7D52;--warn:#B8860B;--r:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{min-height:100%;font-family:'Segoe UI',system-ui,sans-serif;background:var(--hueso);color:var(--c)}
+body{max-width:440px;margin:0 auto;overflow-x:hidden}
+
+.hdr{background:var(--ox);color:#fff;padding:14px 18px 10px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.logo{font-size:17px;font-weight:800;letter-spacing:-.3px}.logo span{color:var(--terra-l)}
+.hstep{font-size:11px;color:rgba(255,255,255,.55);font-weight:600}
+.pbar{height:3px;background:rgba(255,255,255,.15)}
+.pfill{height:100%;background:var(--terra);transition:width .4s ease}
+
+.scr{display:none;padding:18px 16px 40px;animation:fi .25s ease}
+.scr.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+/* HERO */
+.hero{text-align:center;padding:32px 0 24px}
+.hico{width:72px;height:72px;background:var(--terra);border-radius:18px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.ht{font-size:23px;font-weight:800;color:var(--ox);line-height:1.2;margin-bottom:8px}
+.hs{font-size:13px;color:var(--gr);line-height:1.6;max-width:280px;margin:0 auto 24px}
+.flujo{display:flex;align-items:center;justify-content:center;margin-bottom:28px}
+.fpaso{display:flex;flex-direction:column;align-items:center;gap:5px}
+.fdot{width:36px;height:36px;border-radius:50%;background:var(--ox-p);display:flex;align-items:center;justify-content:center;font-size:15px}
+.flbl{font-size:9px;color:var(--gr);text-align:center;line-height:1.3;max-width:50px}
+.flin{height:2px;width:18px;background:var(--gc);margin-bottom:13px}
+
+/* API KEY */
+.apikey-card{background:var(--w);border-radius:var(--r);padding:18px;margin-bottom:14px;border:2px solid var(--ox-p);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.apikey-t{font-size:12px;font-weight:800;color:var(--ox);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.apikey-s{font-size:11px;color:var(--gr);margin-bottom:10px;line-height:1.5}
+.apikey-row{display:flex;gap:8px}
+.apikey-input{flex:1;border:1.5px solid var(--gc);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--c);background:var(--hueso);outline:none;font-family:monospace}
+.apikey-input:focus{border-color:var(--terra)}
+.apikey-save{background:var(--ox);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap}
+.apikey-ok{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ok);font-weight:600;margin-top:6px}
+
+/* CARDS */
+.card{background:var(--w);border-radius:var(--r);padding:18px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.ct{font-size:12px;font-weight:800;color:var(--ox);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;display:flex;align-items:center;gap:7px}
+
+/* UPLOAD */
+.upl{border:2px dashed var(--gc);border-radius:12px;padding:20px 14px;text-align:center;position:relative;cursor:pointer;transition:all .2s;margin-bottom:8px}
+.upl:hover,.upl.drag{border-color:var(--terra);background:var(--terra-p)}
+.upl input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.uico{font-size:26px;margin-bottom:5px}
+.ut{font-size:13px;color:var(--gr)}.ut strong{color:var(--terra);display:block;font-size:14px;margin-bottom:2px}
+.pgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.pimg{aspect-ratio:1;border-radius:8px;overflow:hidden;background:var(--gc);position:relative}
+.pimg img{width:100%;height:100%;object-fit:cover}
+.prm{position:absolute;top:3px;right:3px;width:20px;height:20px;background:rgba(0,0,0,.65);border-radius:50%;color:#fff;font-size:11px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none}
+
+/* CAMPOS */
+.fld{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.fld label{font-size:10px;font-weight:700;color:var(--gr);text-transform:uppercase;letter-spacing:.3px}
+.fld input,.fld textarea,.fld select{border:1.5px solid var(--gc);border-radius:10px;padding:10px 11px;font-size:14px;color:var(--c);background:var(--hueso);outline:none;transition:border-color .2s;font-family:inherit;-webkit-appearance:none}
+.fld input:focus,.fld textarea:focus,.fld select:focus{border-color:var(--terra)}
+.fld textarea{resize:none;min-height:72px;line-height:1.5}
+
+/* BOTONES */
+.btn{width:100%;border:none;border-radius:var(--r);padding:15px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px;font-family:inherit;transition:opacity .15s}
+.btn:active{opacity:.82}
+.btnp{background:var(--terra);color:#fff}
+.btnp:disabled{background:var(--gc);color:var(--gr);cursor:not-allowed}
+.btns{background:transparent;color:var(--ox);border:1.5px solid var(--ox-p)}
+.btnok{background:var(--ok);color:#fff}
+
+/* LOADING */
+.lscr{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:72vh;text-align:center;padding:40px 20px}
+.sbox{width:76px;height:76px;border-radius:18px;background:var(--ox);display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:22px;animation:pulse 1.4s ease-in-out infinite}
+.sbox.t{background:var(--terra)}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.lt{font-size:19px;font-weight:800;color:var(--ox);margin-bottom:6px}
+.ls{font-size:13px;color:var(--gr);margin-bottom:26px;line-height:1.5}
+.psteps{width:100%;max-width:290px;text-align:left}
+.pst{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:12px;color:var(--gr);transition:color .3s}
+.pst.done{color:var(--ok)}.pst.act{color:var(--ox);font-weight:700}
+.pstd{width:20px;height:20px;border-radius:50%;background:var(--gc);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px}
+.pst.done .pstd{background:var(--ok);color:#fff}
+.pst.act .pstd{background:var(--ox);color:#fff;animation:pulse .9s infinite}
+
+/* ANÁLISIS */
+.jbox{background:var(--terra-p);border-left:4px solid var(--terra);border-radius:0 10px 10px 0;padding:12px 14px;margin-bottom:14px;font-size:12px;line-height:1.6}
+.jbox strong{display:block;font-size:10px;font-weight:800;color:var(--terra);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.cbar{margin-top:12px}.cbar-lbl{font-size:11px;color:var(--gr);margin-bottom:4px}
+.cbar-bg{height:6px;background:var(--gc);border-radius:3px;overflow:hidden}
+.cbar-fill{height:100%;background:var(--ok);border-radius:3px;transition:width 1s ease}
+.egrp{margin-bottom:12px}
+.etit{font-size:11px;font-weight:800;color:var(--ox);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
+.elst{display:flex;flex-direction:column;gap:6px}
+.eitem{display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.5}
+.ebdg{flex-shrink:0;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px;margin-top:1px}
+.bfijo{background:#fde8e8;color:#c0392b}
+.bexist{background:#e8f4e8;color:var(--ok)}
+.bprop{background:var(--terra-p);color:var(--terra)}
+.wbox{background:#fffbeb;border-left:4px solid var(--warn);border-radius:0 10px 10px 0;padding:10px 12px;font-size:12px;color:#7a5a00;margin-bottom:10px;line-height:1.5}
+.ibox{background:var(--ox-p);border-left:4px solid var(--ox);border-radius:0 10px 10px 0;padding:10px 12px;font-size:12px;color:var(--ox);margin-bottom:10px;line-height:1.5}
+
+/* PROPUESTA */
+.phdr{background:linear-gradient(135deg,var(--ox),var(--ox-l));color:#fff;padding:22px 18px 18px;text-align:center}
+.pbadge{display:inline-block;background:var(--terra);color:#fff;font-size:9px;font-weight:800;padding:3px 10px;border-radius:20px;margin-bottom:7px;letter-spacing:.5px}
+.ptit{font-size:20px;font-weight:800;margin-bottom:3px}
+.psub{font-size:11px;opacity:.65}
+.rwrap{background:#111;position:relative;overflow:hidden;min-height:180px}
+.rimg{width:100%;display:block;object-fit:cover}
+.rover{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.65));padding:18px 16px 12px;color:#fff;display:none}
+.rover strong{display:block;font-size:13px;margin-bottom:2px}
+.rover span{font-size:11px;opacity:.75}
+.rload{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#2a3a4a,#3d4f63);display:flex;flex-direction:column;align-items:center;justify-content:center;color:rgba(255,255,255,.6);gap:12px;font-size:13px}
+.rspin{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--terra-l);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.chips{display:flex;gap:6px;padding:11px 14px;background:var(--w);overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;background:var(--ox-p);color:var(--ox);font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.psec{background:var(--w);padding:14px 16px;margin-bottom:3px}
+.slbl{font-size:10px;font-weight:800;color:var(--gr);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.palrow{display:flex;gap:10px;flex-wrap:wrap}
+.palitem{display:flex;flex-direction:column;align-items:center;gap:4px}
+.palc{width:38px;height:38px;border-radius:50%;border:1.5px solid rgba(0,0,0,.08)}
+.paln{font-size:9px;color:var(--gr);text-align:center;max-width:44px;line-height:1.3}
+.mitem{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--gc)}
+.mitem:last-child{border-bottom:none}
+.mico{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.mnom{font-size:12px;font-weight:700;color:var(--c)}
+.mdet{font-size:11px;color:var(--gr)}
+.esec{background:var(--ox);padding:18px 16px;margin-bottom:3px;color:#fff}
+.elbl{font-size:10px;opacity:.55;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.emonto{font-size:30px;font-weight:800;margin-bottom:2px}
+.enota{font-size:10px;opacity:.55;margin-bottom:14px}
+.egrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.eitem2{background:rgba(255,255,255,.1);border-radius:10px;padding:10px}
+.econ{font-size:9px;opacity:.65;margin-bottom:2px}
+.eval{font-size:13px;font-weight:800}
+.rsec{background:var(--w);padding:14px 16px;margin-bottom:3px}
+.ropts{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.ropt{display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid var(--gc);border-radius:10px;cursor:pointer;font-size:12px;font-weight:600;color:var(--ox);transition:all .2s}
+.ropt:hover{border-color:var(--terra);background:var(--terra-p);color:var(--terra)}
+.roi{font-size:20px}
+.asec{padding:14px 16px;display:grid;grid-template-columns:1fr 1fr;gap:8px;background:var(--hueso);margin-bottom:24px}
+.abtn{background:var(--w);border:1.5px solid var(--gc);border-radius:12px;padding:13px 10px;text-align:center;cursor:pointer;font-size:11px;font-weight:700;color:var(--ox);display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit}
+.abtn .ai{font-size:18px}
+.afull{grid-column:span 2;flex-direction:row;font-size:13px;padding:15px;background:var(--terra);color:#fff;border-color:var(--terra);justify-content:center;gap:8px}
+.errbox{background:#fef0f0;border:1.5px solid #fcc;border-radius:10px;padding:14px;font-size:12px;color:#c0392b;line-height:1.6;margin-bottom:12px}
+.errbox strong{display:block;margin-bottom:4px;font-size:13px}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--c);color:#fff;padding:9px 18px;border-radius:20px;font-size:12px;z-index:999;transition:transform .3s ease;white-space:nowrap;pointer-events:none;max-width:90vw;text-align:center}
+.toast.on{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="logo">Cocina<span>App</span></div>
+  <div class="hstep" id="hstep">Inicio</div>
+</div>
+<div class="pbar"><div class="pfill" id="pfill" style="width:0%"></div></div>
+<div class="toast" id="toast"></div>
+
+<!-- ══ S0 INICIO ══ -->
+<div class="scr on" id="s0">
+  <div class="hero">
+    <div class="hico">🏠</div>
+    <h1 class="ht">De croquis a propuesta en minutos</h1>
+    <p class="hs">La IA lee el croquis e identifica el espacio sola. Tú solo confirmas y presentas.</p>
+    <div class="flujo">
+      <div class="fpaso"><div class="fdot">🔑</div><div class="flbl">API Key</div></div>
+      <div class="flin"></div>
+      <div class="fpaso"><div class="fdot">📷</div><div class="flbl">Fotos + croquis</div></div>
+      <div class="flin"></div>
+      <div class="fpaso"><div class="fdot">🧠</div><div class="flbl">IA interpreta</div></div>
+      <div class="flin"></div>
+      <div class="fpaso"><div class="fdot">✨</div><div class="flbl">Board listo</div></div>
+    </div>
+  </div>
+
+  <!-- API KEY -->
+  <div class="apikey-card">
+    <div class="apikey-t">🔑 API Key de Anthropic</div>
+    <div class="apikey-s">Necesitas tu clave de <strong>console.anthropic.com</strong> para que la IA procese las imágenes. Se guarda solo en tu dispositivo.</div>
+    <div class="apikey-row">
+      <input class="apikey-input" type="password" id="apikey-input" placeholder="sk-ant-api03-...">
+      <button class="apikey-save" onclick="guardarKey()">Guardar</button>
+    </div>
+    <div class="apikey-ok" id="apikey-ok" style="display:none">✅ API Key guardada</div>
+  </div>
+
+  <button class="btn btnp" onclick="iniciar()">Nueva propuesta →</button>
+</div>
+
+<!-- ══ S1 EVIDENCIA ══ -->
+<div class="scr" id="s1">
+  <div class="card">
+    <div class="ct"><span>📷</span> Fotos del espacio actual</div>
+    <div class="upl" ondragover="ev.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="onDrop(event,'fotos')">
+      <input type="file" accept="image/*" multiple onchange="onFiles(this,'fotos')">
+      <div class="uico">📷</div>
+      <div class="ut"><strong>Toca o arrastra fotos</strong>Estado actual — varios ángulos</div>
+    </div>
+    <div class="pgrid" id="prev-fotos"></div>
+  </div>
+
+  <div class="card">
+    <div class="ct"><span>✏️</span> Croquis / plano propuesto</div>
+    <div class="upl" ondragover="ev.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="onDrop(event,'croquis')">
+      <input type="file" accept="image/*" multiple onchange="onFiles(this,'croquis')">
+      <div class="uico">✏️</div>
+      <div class="ut"><strong>Toca para subir croquis</strong>Boceto a mano con medidas y distribución</div>
+    </div>
+    <div class="pgrid" id="prev-croquis"></div>
+  </div>
+
+  <div class="card">
+    <div class="ct"><span>💬</span> Cliente y preferencias</div>
+    <div class="fld"><label>Nombre del cliente</label><input type="text" id="nom" placeholder="Ej: Familia Martínez"></div>
+    <div class="fld"><label>Preferencias de diseño</label>
+      <textarea id="pref">Inferiores terracota #C4622D, superiores gris Oxford #3D4F63, cubierta granito claro, herrajes acero inoxidable, estilo contemporáneo funcional.</textarea>
+    </div>
+  </div>
+
+  <div id="err1"></div>
+  <button class="btn btnp" onclick="interpretar()">🧠 Interpretar espacio →</button>
+  <button class="btn btns" onclick="ir(0)">← Atrás</button>
+</div>
+
+<!-- ══ S2 INTERPRETANDO ══ -->
+<div class="scr" id="s2">
+  <div class="lscr">
+    <div class="sbox">🧠</div>
+    <div class="lt">Interpretando el espacio</div>
+    <div class="ls">La IA está leyendo el croquis y relacionándolo con las fotos reales. Espera 20–60 segundos.</div>
+    <div class="psteps">
+      <div class="pst act" id="ps1"><div class="pstd">1</div> Analizando croquis y medidas</div>
+      <div class="pst" id="ps2"><div class="pstd">2</div> Relacionando con arquitectura real</div>
+      <div class="pst" id="ps3"><div class="pstd">3</div> Clasificando elementos</div>
+      <div class="pst" id="ps4"><div class="pstd">4</div> Detectando circulaciones</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S3 INTERPRETACIÓN ══ -->
+<div class="scr" id="s3">
+  <div class="jbox">
+    <strong>🔒 Regla aplicada</strong>
+    Croquis manda sobre geometría. Fotos solo confirman estado existente. Arquitectura fija no se mueve.
+  </div>
+  <div class="card">
+    <div class="ct"><span>📐</span> Planta interpretada</div>
+    <div id="planta-interp" style="border-radius:10px;overflow:hidden;background:#f0f0f0;margin-bottom:10px"></div>
+    <div class="cbar">
+      <div class="cbar-lbl">Confianza: <strong id="conf-val">—</strong></div>
+      <div class="cbar-bg"><div class="cbar-fill" id="conf-fill" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct"><span>📋</span> Resumen</div>
+    <div id="resumen" style="font-size:13px;line-height:1.65"></div>
+    <div id="dims" style="margin-top:10px;font-size:12px;color:var(--ox);font-weight:700"></div>
+  </div>
+  <div class="card">
+    <div class="ct"><span>🗂</span> Elementos identificados</div>
+    <div id="elem-lista"></div>
+  </div>
+  <div id="alertas"></div>
+  <div class="ibox">¿El espacio está bien interpretado? Confirma para continuar.</div>
+  <div id="err3"></div>
+  <button class="btn btnok" onclick="confirmar()">✅ Confirmar y generar propuesta</button>
+  <button class="btn btns" style="margin-top:8px" onclick="ir(1)">✎ Corregir evidencia</button>
+</div>
+
+<!-- ══ S4 GENERANDO ══ -->
+<div class="scr" id="s4">
+  <div class="lscr">
+    <div class="sbox t">✨</div>
+    <div class="lt">Generando propuesta visual</div>
+    <div class="ls">Aplicando diseño confirmado y preferencias del cliente.</div>
+    <div class="psteps">
+      <div class="pst act" id="pr1"><div class="pstd">1</div> Construyendo descripción de diseño</div>
+      <div class="pst" id="pr2"><div class="pstd">2</div> Generando render fotorrealista</div>
+      <div class="pst" id="pr3"><div class="pstd">3</div> Armando board de propuesta</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ S5 BOARD ══ -->
+<div class="scr" id="s5">
+  <div class="phdr">
+    <div class="pbadge">PROPUESTA DE DISEÑO</div>
+    <div class="ptit" id="p-tit">—</div>
+    <div class="psub" id="p-sub">—</div>
+  </div>
+  <div class="rwrap">
+    <div class="rload" id="rload"><div class="rspin"></div><span>Generando render...</span></div>
+    <img id="rimg" class="rimg" style="display:none" onload="onRenderOk()" onerror="onRenderErr()">
+    <div class="rover" id="rover"><strong id="r-tit">—</strong><span id="r-dim">—</span></div>
+  </div>
+  <div class="chips" id="p-chips"></div>
+  <div class="psec"><div class="slbl">Paleta de colores</div><div class="palrow" id="p-pal"></div></div>
+  <div class="psec"><div class="slbl">Distribución en planta</div><div id="planta-board" style="margin-top:8px;border-radius:8px;overflow:hidden;background:#f0f0f0"></div></div>
+  <div class="psec"><div class="slbl">Materiales y acabados</div><div id="p-mat"></div></div>
+  <div class="esec">
+    <div class="elbl">Estimado de inversión</div>
+    <div class="emonto" id="p-monto">—</div>
+    <div class="enota">MXN · Solo muebles · Sin electrodomésticos · Estimado referencial</div>
+    <div class="egrid" id="p-desglose"></div>
+  </div>
+  <div class="rsec">
+    <div class="slbl">Generar alternativa</div>
+    <div class="ropts">
+      <div class="ropt" onclick="regen('Diferente distribución, misma paleta terracota y gris Oxford. Mantén arquitectura fija.')"><div class="roi">🔄</div> Diferente distribución, mismos colores</div>
+      <div class="ropt" onclick="regen('Misma distribución pero paleta más oscura y elegante. Mantén arquitectura fija.')"><div class="roi">🎨</div> Misma distribución, diferentes colores</div>
+      <div class="ropt" onclick="regen('Variante minimalista con blancos y madera clara. Mantén arquitectura fija.')"><div class="roi">⬜</div> Estilo minimalista</div>
+    </div>
+  </div>
+  <div class="asec">
+    <div class="abtn" onclick="imprimirPDF()"><div class="ai">🖨</div>Guardar PDF</div>
+    <div class="abtn" onclick="toast('📤 Comparte o guarda este archivo HTML')"><div class="ai">📤</div>Compartir</div>
+    <div class="abtn" onclick="ir(1)"><div class="ai">✎</div>Ajustar datos</div>
+    <div class="abtn" onclick="toast('📋 Próximamente: lista BOM completa')"><div class="ai">📋</div>Lista BOM</div>
+    <div class="abtn afull" onclick="ir(0)">✨ Nueva propuesta</div>
+  </div>
+</div>
+
+<script>
+/* ════════ STATE ════════ */
+const ST={fotos:[],croquis:[],analysis:null,nom:'',pref:''};
+const STEPS=['Inicio','Evidencia','Interpretando…','Espacio interpretado','Generando…','Propuesta'];
+const PCTS=[0,15,38,60,80,100];
+
+/* ════════ API KEY ════════ */
+function guardarKey(){
+  const k=document.getElementById('apikey-input').value.trim();
+  if(!k.startsWith('sk-')){toast('⚠️ La API key debe empezar con sk-',3000);return;}
+  localStorage.setItem('cocina_apikey',k);
+  document.getElementById('apikey-ok').style.display='flex';
+  toast('✅ API Key guardada',2000);
+}
+function getKey(){return localStorage.getItem('cocina_apikey')||'';}
+
+window.addEventListener('load',()=>{
+  const k=getKey();
+  if(k){
+    document.getElementById('apikey-input').value=k;
+    document.getElementById('apikey-ok').style.display='flex';
+  }
+});
+
+/* ════════ NAV ════════ */
+function ir(n){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s'+n).classList.add('on');
+  document.getElementById('hstep').textContent=STEPS[n];
+  document.getElementById('pfill').style.width=PCTS[n]+'%';
+  window.scrollTo(0,0);
+}
+function iniciar(){
+  if(!getKey()){toast('⚠️ Primero guarda tu API Key',3000);return;}
+  ir(1);
+}
+function toast(msg,dur=2600){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'),dur);
+}
+
+/* ════════ FILES ════════ */
+function onFiles(input,key){addFiles(Array.from(input.files),key);}
+function onDrop(e,key){
+  e.preventDefault();
+  document.querySelectorAll('.upl').forEach(u=>u.classList.remove('drag'));
+  addFiles(Array.from(e.dataTransfer.files).filter(f=>f.type.startsWith('image/')),key);
+}
+function addFiles(files,key){
+  files.filter(f=>f.type.startsWith('image/')).forEach(f=>{
+    const r=new FileReader();
+    r.onload=ev=>{
+      ST[key].push({name:f.name,b64:ev.target.result.split(',')[1],mime:f.type||'image/jpeg'});
+      renderPrev(key);
+    };
+    r.readAsDataURL(f);
+  });
+}
+function renderPrev(key){
+  const g=document.getElementById('prev-'+key);g.innerHTML='';
+  ST[key].forEach((img,i)=>{
+    const d=document.createElement('div');d.className='pimg';
+    d.innerHTML=`<img src="data:${img.mime};base64,${img.b64}"><button class="prm" onclick="rmImg('${key}',${i})">×</button>`;
+    g.appendChild(d);
+  });
+}
+function rmImg(key,i){ST[key].splice(i,1);renderPrev(key);}
+
+/* ════════ COMPRIMIR ════════ */
+async function comprimirB64(b64,mime){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=1024;let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){const r=MAX/Math.max(w,h);w=Math.round(w*r);h=Math.round(h*r);}
+      const cv=document.createElement('canvas');
+      cv.width=w;cv.height=h;
+      cv.getContext('2d').drawImage(img,0,0,w,h);
+      const q=b64.length>800*1.4?0.72:0.85;
+      res({b64:cv.toDataURL('image/jpeg',q).split(',')[1],mime:'image/jpeg'});
+    };
+    img.onerror=()=>res({b64,mime});
+    img.src=`data:${mime};base64,${b64}`;
+  });
+}
+
+/* ════════ ANTHROPIC API ════════ */
+const API='https://api.anthropic.com/v1/messages';
+const HDRS=(key)=>({
+  'Content-Type':'application/json',
+  'x-api-key':key,
+  'anthropic-version':'2023-06-01',
+  'anthropic-dangerous-direct-browser-access':'true'
+});
+
+async function callClaude(key,messages,maxTokens=2000){
+  const res=await fetch(API,{
+    method:'POST',
+    headers:HDRS(key),
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:maxTokens,messages})
+  });
+  if(!res.ok){
+    const err=await res.json().catch(()=>({}));
+    throw new Error(err.error?.message||`HTTP ${res.status}`);
+  }
+  const data=await res.json();
+  return data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+}
+
+/* ════════ SYSTEM PROMPT ════════ */
+const SYS=`Eres el motor de inteligencia espacial de CocinaApp.
+Reconstruyes el espacio como un arquitecto: geometría descriptiva, planta, circulaciones.
+
+JERARQUÍA:
+1) Croquis/plano y sus cotas mandan sobre la geometría.
+2) Instrucciones del cliente.
+3) Fotos = evidencia del estado EXISTENTE únicamente.
+
+CLASIFICA cada elemento:
+- FIJO: muros, puertas, ventanas, canceles, columnas.
+- EXISTENTE: aparece en fotos actuales.
+- PROPUESTO: en croquis o pedido por cliente.
+- DESCONOCIDO: no determinable.
+
+Considera circulación, apertura de electrodomésticos, zonas de trabajo.
+Responde SOLO JSON válido, sin markdown:
+{"space":{"width_cm":null,"depth_cm":null,"height_cm":null},"distribution":"U|L|Lineal|Isla","fixed_elements":[{"name":"","position":"","details":"","confidence":0.0}],"existing_elements":[{"name":"","position":"","details":"","confidence":0.0}],"proposed_elements":[{"name":"","position":"","details":"","confidence":0.0}],"circulation":[{"zone":"","purpose":""}],"interferences":[],"uncertainties":[],"confidence":0.0,"summary":""}`;
+
+/* ════════ INTERPRETAR ════════ */
+async function interpretar(){
+  const errDiv=document.getElementById('err1');errDiv.innerHTML='';
+  if(!ST.fotos.length){errDiv.innerHTML='<div class="errbox"><strong>Faltan fotos</strong>Agrega al menos una foto del espacio actual.</div>';return;}
+  if(!ST.croquis.length){errDiv.innerHTML='<div class="errbox"><strong>Falta el croquis</strong>Agrega el croquis con la distribución propuesta.</div>';return;}
+  const key=getKey();
+  if(!key){errDiv.innerHTML='<div class="errbox"><strong>Falta la API Key</strong>Vuelve al inicio y guarda tu API Key de Anthropic.</div>';return;}
+
+  ST.nom=document.getElementById('nom').value.trim();
+  ST.pref=document.getElementById('pref').value.trim();
+  ir(2);
+
+  // Animar pasos
+  animPasos(['ps1','ps2','ps3','ps4'],[9000,20000,32000]);
+
+  // Construir mensajes multimodal
+  const content=[{type:'text',text:`${SYS}\n\nAnaliza las imágenes. Las primeras ${ST.fotos.length} son FOTOS del estado actual. Las siguientes ${ST.croquis.length} son el CROQUIS propuesto.\nPREFERENCIAS: ${ST.pref||'Sin preferencias.'}\nRegla: el croquis manda. Responde SOLO el JSON.`}];
+
+  for(let i=0;i<ST.fotos.length;i++){
+    const c=await comprimirB64(ST.fotos[i].b64,ST.fotos[i].mime);
+    content.push({type:'image',source:{type:'base64',media_type:c.mime,data:c.b64}});
+    content.push({type:'text',text:`[Foto ${i+1} — estado actual]`});
+  }
+  for(let i=0;i<ST.croquis.length;i++){
+    const c=await comprimirB64(ST.croquis[i].b64,ST.croquis[i].mime);
+    content.push({type:'image',source:{type:'base64',media_type:c.mime,data:c.b64}});
+    content.push({type:'text',text:`[Croquis ${i+1} — propuesta]`});
+  }
+
+  try{
+    const txt=await callClaude(key,[{role:'user',content}],2000);
+    const m=txt.replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'').trim().match(/\{[\s\S]*\}/);
+    if(!m) throw new Error('La IA no devolvió JSON válido.');
+    ST.analysis=JSON.parse(m[0]);
+    mostrarInterp();
+    ir(3);
+  }catch(e){
+    ir(1);
+    let msg=e.message||'Error desconocido.';
+    if(msg.includes('401')) msg='API Key incorrecta o sin permisos. Verifica en console.anthropic.com';
+    else if(msg.includes('429')) msg='Límite de uso alcanzado. Espera un momento e intenta de nuevo.';
+    else if(msg.includes('403')) msg='Acceso denegado. Verifica que tu API Key esté activa.';
+    document.getElementById('err1').innerHTML=`<div class="errbox"><strong>Error al interpretar</strong>${msg}</div>`;
+  }
+}
+
+function animPasos(ids,delays){
+  ids.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    el.classList.remove('act','done');
+    el.querySelector('.pstd').textContent=i+1;
+  });
+  document.getElementById(ids[0]).classList.add('act');
+  delays.forEach((ms,i)=>{
+    setTimeout(()=>{
+      if(!document.getElementById(ids[i])) return;
+      document.getElementById(ids[i]).classList.remove('act');
+      document.getElementById(ids[i]).classList.add('done');
+      document.getElementById(ids[i]).querySelector('.pstd').textContent='✓';
+      if(ids[i+1]) document.getElementById(ids[i+1]).classList.add('act');
+    },ms);
+  });
+}
+
+/* ════════ MOSTRAR INTERPRETACIÓN ════════ */
+function mostrarInterp(){
+  const a=ST.analysis;
+  dibujarPlanta(a,'planta-interp');
+  const conf=Math.round((a.confidence||0)*100);
+  document.getElementById('conf-val').textContent=conf+'%';
+  setTimeout(()=>{document.getElementById('conf-fill').style.width=conf+'%';},100);
+  document.getElementById('resumen').textContent=a.summary||'Sin resumen.';
+  const sp=a.space||{};
+  if(sp.width_cm||sp.depth_cm)
+    document.getElementById('dims').textContent=`📐 ${sp.width_cm||'?'} × ${sp.depth_cm||'?'} cm${sp.height_cm?' · Techo '+sp.height_cm+' cm':''} · ${a.distribution||''}`;
+
+  const ec=document.getElementById('elem-lista');ec.innerHTML='';
+  [{k:'fixed_elements',l:'🔒 Fijos',b:'bfijo'},
+   {k:'existing_elements',l:'📦 Existentes',b:'bexist'},
+   {k:'proposed_elements',l:'✏️ Propuestos',b:'bprop'}].forEach(g=>{
+    const items=a[g.k]||[];if(!items.length)return;
+    const w=document.createElement('div');w.className='egrp';
+    w.innerHTML=`<div class="etit">${g.l}</div><div class="elst">${
+      items.map(el=>`<div class="eitem"><span class="ebdg ${g.b}">${g.k==='fixed_elements'?'Fijo':g.k==='existing_elements'?'Exist.':'Prop.'}</span><span><strong>${el.name}</strong>${el.position?' — '+el.position:''}${el.details?'<br><span style="color:var(--gr);font-size:11px">'+el.details+'</span>':''}</span></div>`).join('')
+    }</div>`;
+    ec.appendChild(w);
+  });
+
+  const aw=document.getElementById('alertas');aw.innerHTML='';
+  if((a.interferences||[]).length) aw.innerHTML+=`<div class="wbox"><strong>⚠️ Interferencias</strong>${a.interferences.join('<br>')}</div>`;
+  if((a.uncertainties||[]).length) aw.innerHTML+=`<div class="ibox"><strong>❓ Incertidumbres</strong>${a.uncertainties.join('<br>')}</div>`;
+}
+
+/* ════════ DIBUJAR PLANTA ════════ */
+function dibujarPlanta(a,cid){
+  const sp=a.space||{};
+  const W=380,H=280,M=36,sw=sp.width_cm||266,sd=sp.depth_cm||277;
+  const sc=Math.min((W-2*M)/sw,(H-2*M)/sd);
+  const x0=M,y0=M,x1=x0+sw*sc,y1=y0+sd*sc;
+  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  s+=`<rect x="${x0}" y="${y0}" width="${sw*sc}" height="${sd*sc}" fill="white" stroke="#1a1a1a" stroke-width="4" rx="2"/>`;
+  const fijos=a.fixed_elements||[];
+  const todos=[...(a.existing_elements||[]),...(a.proposed_elements||[])];
+  const dist=(a.distribution||'').toLowerCase();
+
+  fijos.forEach(el=>{
+    const n=el.name.toLowerCase();
+    if(n.includes('puerta')){
+      s+=`<line x1="${x1}" y1="${y0+10}" x2="${x1}" y2="${y0+sd*sc*.3}" stroke="#c0392b" stroke-width="5"/>`;
+      s+=`<path d="M ${x1} ${y0+10} Q ${x1-sd*sc*.25} ${y0+10} ${x1-sd*sc*.25} ${y0+sd*sc*.25}" fill="none" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+      s+=`<text x="${x1+4}" y="${y0+sd*sc*.12}" font-size="8" fill="#c0392b" font-weight="700">PUERTA</text>`;
+    }
+    if(n.includes('cancel')||n.includes('ventana')){
+      const clr='#2980b9',lbl=n.includes('cancel')?'CANCEL':'VENTANA';
+      s+=`<line x1="${x0+sw*sc*.15}" y1="${y0}" x2="${x0+sw*sc*.55}" y2="${y0}" stroke="${clr}" stroke-width="5"/>`;
+      s+=`<text x="${x0+sw*sc*.35}" y="${y0-5}" text-anchor="middle" font-size="8" fill="${clr}">${lbl}</text>`;
+    }
+  });
+
+  if(dist.includes('u')||dist.includes('l')||todos.some(e=>/(superior|gabinete)/.test(e.name.toLowerCase()))){
+    s+=`<rect x="${x0+2}" y="${y0+2}" width="${sw*sc*.72}" height="${sd*sc*.2}" fill="#3D4F63" rx="2"/>`;
+    s+=`<text x="${x0+sw*sc*.36}" y="${y0+sd*sc*.13}" text-anchor="middle" fill="white" font-size="9" font-weight="700">Gabinetes sup.</text>`;
+  }
+  s+=`<rect x="${x0+2}" y="${y0+sd*sc*.2}" width="${sw*sc*.72}" height="${sd*sc*.2}" fill="#C4622D" rx="2" opacity=".9"/>`;
+
+  const estuf=todos.find(e=>/(estufa|parrilla)/.test(e.name.toLowerCase()));
+  if(estuf){
+    const ex=x0+sw*sc*.2,ey=y0+sd*sc*.2;
+    s+=`<rect x="${ex}" y="${ey}" width="${sw*sc*.2}" height="${sd*sc*.2}" fill="#1a1a1a" rx="2"/>`;
+    [[.07,.07],[.17,.07],[.07,.14],[.17,.14]].forEach(([dx,dy])=>
+      s+=`<circle cx="${ex+sw*sc*dx}" cy="${ey+sd*sc*dy}" r="4.5" fill="#333" stroke="#555" stroke-width="1"/>`);
+    s+=`<text x="${ex+sw*sc*.1}" y="${ey+sd*sc*.22}" text-anchor="middle" fill="#aaa" font-size="7">ESTUFA</text>`;
+  }
+  const tarj=todos.find(e=>/(tarja|fregadero)/.test(e.name.toLowerCase()));
+  if(tarj){
+    const tx=x0+2,ty=y0+sd*sc*.28;
+    s+=`<rect x="${tx}" y="${ty}" width="${sw*sc*.18}" height="${sd*sc*.16}" fill="#7A8A9A" rx="2"/>`;
+    s+=`<rect x="${tx+2}" y="${ty+2}" width="${sw*sc*.08}" height="${sd*sc*.12}" fill="#6A7A8A" rx="1"/>`;
+    s+=`<rect x="${tx+sw*sc*.09}" y="${ty+2}" width="${sw*sc*.08}" height="${sd*sc*.12}" fill="#6A7A8A" rx="1"/>`;
+    s+=`<text x="${tx+sw*sc*.09}" y="${ty+sd*sc*.18}" text-anchor="middle" fill="white" font-size="7">TARJA</text>`;
+  }
+  const refr=todos.find(e=>/(refri|refrigerador)/.test(e.name.toLowerCase()));
+  if(refr){
+    s+=`<rect x="${x1-sw*sc*.13}" y="${y0+2}" width="${sw*sc*.13}" height="${sd*sc*.42}" fill="#E0D5C8" stroke="#ccc" stroke-width="1" rx="2"/>`;
+    s+=`<text x="${x1-sw*sc*.065}" y="${y0+sd*sc*.23}" text-anchor="middle" fill="#666" font-size="7">REFRI</text>`;
+  }
+  const cont=todos.find(e=>/(contra|barra|isla)/.test(e.name.toLowerCase()));
+  if(cont){
+    const by=y1-sd*sc*.26;
+    s+=`<rect x="${x0+sw*sc*.08}" y="${by}" width="${sw*sc*.62}" height="${sd*sc*.18}" fill="#B8560A" rx="5"/>`;
+    s+=`<text x="${x0+sw*sc*.39}" y="${by+sd*sc*.1}" text-anchor="middle" fill="white" font-size="8" font-weight="700">CONTRABARRA</text>`;
+  }
+  if(dist.includes('u'))
+    s+=`<rect x="${x1-sw*sc*.13}" y="${y0+sd*sc*.42}" width="${sw*sc*.13}" height="${sd*sc*.2}" fill="#C4622D" rx="2" opacity=".9"/>`;
+
+  s+=`<text x="${(x0+x1)/2}" y="${H-6}" text-anchor="middle" fill="#888" font-size="9">${sw} cm</text>`;
+  s+=`<text x="10" y="${(y0+y1)/2}" text-anchor="middle" fill="#888" font-size="9" transform="rotate(-90,10,${(y0+y1)/2})">${sd} cm</text>`;
+  s+=`</svg>`;
+  document.getElementById(cid).innerHTML=s;
+}
+
+/* ════════ CONFIRMAR Y GENERAR ════════ */
+async function confirmar(){
+  if(!ST.analysis){document.getElementById('err3').innerHTML='<div class="errbox">Sin análisis. Vuelve a interpretar.</div>';return;}
+  ir(4);
+  animPasos(['pr1','pr2','pr3'],[3000,7000]);
+  const key=getKey();
+  const a=ST.analysis;
+  const sp=a.space||{};
+
+  try{
+    const promptRender=await callClaude(key,[{role:'user',content:`Eres experto en renders de cocinas fotorrealistas.
+Espacio: ${sp.width_cm||266}×${sp.depth_cm||277}cm, distribución ${a.distribution||'U'}.
+Fijos (no mover): ${(a.fixed_elements||[]).map(e=>e.name).join(', ')}.
+Propuesta: ${(a.proposed_elements||[]).map(e=>e.name+' en '+e.position).join('; ')}.
+Preferencias: ${ST.pref}.
+Genera UN prompt en inglés para imagen fotorrealista de esta cocina. Incluye: terracota #C4622D muebles inferiores, gris Oxford #3D4F63 superiores, iluminación cálida, perspectiva interior, alta calidad. Máximo 160 palabras. Solo el prompt.`}],500);
+
+    const seed=Math.floor(Math.random()*99999);
+    const imgUrl=`https://image.pollinations.ai/prompt/${encodeURIComponent(promptRender.trim())}?width=1200&height=800&seed=${seed}&nologo=true&enhance=true`;
+    armarBoard(a,imgUrl);
+    ir(5);
+    document.getElementById('rimg').src=imgUrl;
+  }catch(e){
+    armarBoard(a,null);
+    ir(5);
+    document.getElementById('rload').innerHTML=`<div style="padding:20px;text-align:center;color:rgba(255,255,255,.6);font-size:12px">⚠️ No se generó el render.<br>Usa "Generar alternativa" para reintentar.</div>`;
+    toast('Board generado sin render. '+e.message,4000);
+  }
+}
+
+function onRenderOk(){
+  document.getElementById('rload').style.display='none';
+  document.getElementById('rimg').style.display='block';
+  document.getElementById('rover').style.display='block';
+}
+function onRenderErr(){
+  document.getElementById('rload').innerHTML=`<div style="padding:20px;text-align:center;color:rgba(255,255,255,.5);font-size:12px">⚠️ No se cargó el render. Usa "Generar alternativa".</div>`;
+}
+
+/* ════════ ARMAR BOARD ════════ */
+function armarBoard(a,imgUrl){
+  const sp=a.space||{};
+  const dist=a.distribution||'U';
+  document.getElementById('p-tit').textContent=`Cocina en ${dist} — Terracota & Gris Oxford`;
+  document.getElementById('p-sub').textContent=`Cliente: ${ST.nom||'—'}  ·  ${sp.width_cm||'?'} × ${sp.depth_cm||'?'} cm`;
+  document.getElementById('r-tit').textContent=`Cocina en ${dist} — Terracota & Gris Oxford`;
+  document.getElementById('r-dim').textContent=`${sp.width_cm||'?'} × ${sp.depth_cm||'?'} cm`;
+
+  const elem=[...(a.proposed_elements||[]),...(a.existing_elements||[])].map(e=>e.name).slice(0,5);
+  document.getElementById('p-chips').innerHTML=
+    `<div class="chip">${sp.width_cm||'?'} × ${sp.depth_cm||'?'} cm</div>`+
+    `<div class="chip">En ${dist}</div>`+
+    `<div class="chip">Terracota + Oxford</div>`+
+    elem.map(n=>`<div class="chip">${n}</div>`).join('');
+
+  document.getElementById('p-pal').innerHTML=`
+    <div class="palitem"><div class="palc" style="background:#C4622D"></div><div class="paln">Terracota Inf.</div></div>
+    <div class="palitem"><div class="palc" style="background:#3D4F63"></div><div class="paln">Gris Oxford Sup.</div></div>
+    <div class="palitem"><div class="palc" style="background:#D4C5B2"></div><div class="paln">Cubierta</div></div>
+    <div class="palitem"><div class="palc" style="background:#F5F2EE;border:1px solid #ddd"></div><div class="paln">Pared</div></div>
+    <div class="palitem"><div class="palc" style="background:#8A9A8A"></div><div class="paln">Acero</div></div>`;
+
+  dibujarPlanta(a,'planta-board');
+
+  const hc=(a.fixed_elements||[]).some(e=>/(cancel|ventana)/.test(e.name.toLowerCase()));
+  document.getElementById('p-mat').innerHTML=`
+    <div class="mitem"><div class="mico">🪵</div><div><div class="mnom">Puertas melamina</div><div class="mdet">Lisa mate — Terracota inf. / Gris Oxford sup.</div></div></div>
+    <div class="mitem"><div class="mico">⬛</div><div><div class="mnom">Cubierta granito claro</div><div class="mdet">Acabado pulido, junta mínima</div></div></div>
+    <div class="mitem"><div class="mico">🔩</div><div><div class="mnom">Herrajes acero inoxidable</div><div class="mdet">Bisagras con amortiguador, tiradores línea recta</div></div></div>
+    ${hc?'<div class="mitem"><div class="mico">🪟</div><div><div class="mnom">Cancel / aluminio</div><div class="mdet">Perfil champagne, vidrio claro 6mm</div></div></div>':''}
+    <div class="mitem"><div class="mico">💨</div><div><div class="mnom">Campana extractora</div><div class="mdet">Acero inoxidable, extracción exterior</div></div></div>`;
+
+  const w=sp.width_cm||266,d=sp.depth_cm||277;
+  const low=Math.round((w/100)*(d/100)*8500/1000)*1000;
+  const high=Math.round(low*1.25/1000)*1000;
+  document.getElementById('p-monto').textContent=`$${low.toLocaleString()} – $${high.toLocaleString()}`;
+  document.getElementById('p-desglose').innerHTML=`
+    <div class="eitem2"><div class="econ">Muebles inferiores</div><div class="eval">$${Math.round(low*.42/1000)*1000}</div></div>
+    <div class="eitem2"><div class="econ">Muebles superiores</div><div class="eval">$${Math.round(low*.28/1000)*1000}</div></div>
+    <div class="eitem2"><div class="econ">Cubierta</div><div class="eval">$${Math.round(low*.18/1000)*1000}</div></div>
+    <div class="eitem2"><div class="econ">Aluminio / herrajes</div><div class="eval">$${Math.round(low*.12/1000)*1000}</div></div>`;
+}
+
+/* ════════ REGENERAR ════════ */
+async function regen(instruccion){
+  if(!ST.analysis){toast('Primero genera una propuesta');return;}
+  toast('🔄 Generando alternativa…',5000);
+  const key=getKey();
+  const a=ST.analysis;const sp=a.space||{};
+  try{
+    const r=await callClaude(key,[{role:'user',content:`Prompt fotorrealista de cocina en inglés, máximo 160 palabras.\nEspacio: ${sp.width_cm||266}×${sp.depth_cm||277}cm, ${a.distribution||'U'}.\nFijos (no mover): ${(a.fixed_elements||[]).map(e=>e.name).join(', ')}.\nINSTRUCCIÓN: ${instruccion}\nSolo el prompt, sin explicaciones.`}],400);
+    const seed=Math.floor(Math.random()*99999);
+    const imgUrl=`https://image.pollinations.ai/prompt/${encodeURIComponent(r.trim())}?width=1200&height=800&seed=${seed}&nologo=true&enhance=true`;
+    const img=document.getElementById('rimg');
+    img.style.display='none';
+    const rl=document.getElementById('rload');
+    rl.style.display='flex';
+    rl.innerHTML='<div class="rspin"></div><span>Cargando alternativa...</span>';
+    document.getElementById('rover').style.display='none';
+    img.src=imgUrl;
+    window.scrollTo(0,0);
+    toast('✨ Alternativa cargando…',3000);
+  }catch(e){toast('Error: '+e.message,3500);}
+}
+
+/* ════════ PDF ════════ */
+function imprimirPDF(){
+  window.print();
+}
+</script>
+</body>
+</html>
